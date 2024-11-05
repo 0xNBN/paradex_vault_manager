@@ -340,40 +340,6 @@ async def post_order_payload(paradex_http_url: str, paradex_jwt: str, payload: d
     return response
 
 
-async def cancel_all_orders_payload(paradex_http_url: str, paradex_jwt: str) -> bool:
-    """
-    Paradex RESToverHTTP endpoint.
-    [DELETE] /orders/{order_id}
-    """
-    method: str = "DELETE"
-    path: str = f"/orders"
-    ret_val = False
-    headers: Dict = await create_rest_headers(
-        paradex_jwt=paradex_jwt,
-        paradex_maker_secret_key="",
-        method=method,
-        path=path,
-        body="",
-    )
-
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.delete(paradex_http_url + path, headers=headers) as response:
-                status_code: int = response.status
-                response: Dict = await response.json(content_type=None)
-                check_token_expiry(status_code=status_code, response=response)
-                if status_code == 201 or status_code == 204:
-                    logging.info(f"Order cancelled: {status_code}")
-                    ret_val = True
-                else:
-                    logging.info(f"Unable to [DELETE] {path}")
-                    logging.info(f"Status Code: {status_code}")
-                    logging.info(f"Response Text: {response}")
-
-        except aiohttp.ClientConnectorError as e:
-            logging.error(f"[DELETE] /orders ClientConnectorError: {e}")
-    return ret_val
-
 async def delete_order_payload(paradex_http_url: str, paradex_jwt: str, order_id: str) -> bool:
     """
     Paradex RESToverHTTP endpoint.
